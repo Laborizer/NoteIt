@@ -1,4 +1,4 @@
-package laiho.tuni.fi.myapplication;
+package laiho.tuni.fi.noteit;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;

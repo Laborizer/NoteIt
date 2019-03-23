@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 28
     defaultConfig {
-        applicationId "laiho.tuni.fi.myapplication"
+        applicationId "laiho.tuni.fi.noteit"
         minSdkVersion 17
         targetSdkVersion 28
         versionCode 1
