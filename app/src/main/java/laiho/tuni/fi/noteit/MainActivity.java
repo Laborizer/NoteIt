@@ -41,11 +41,12 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.saveButton);
         layoutContent = (LinearLayout) this.findViewById(R.id.mainContent);
         this.noteList = new ArrayList<>();
-        this.noteAmount = 1;
-        loadNote("Notes.txt");
+        this.noteAmount = 0;
 
         this.mainEditText = findViewById(R.id.MainEditText);
-        this.mainEditText.setText(noteList.get(0));
+
+        loadAllNotes();
+        makeNoteViews();
     }
 
     @Override
@@ -71,7 +72,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void save(View view) {
-        saveNote("Notes.txt");
+        String fName = "Note" + this.noteList.size() + ".txt";
+        saveNote(fName);
     }
 
     public void saveNote(String fileName) {
@@ -81,9 +83,18 @@ public class MainActivity extends AppCompatActivity {
             out.write(mainEditText.getText().toString());
             out.close();
             Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT).show();
+            noteList.add(mainEditText.getText().toString());
         } catch (Throwable t) {
             t.printStackTrace();
         }
+
+        TextView noteView = new TextView(this);
+        noteView.setText(mainEditText.getText().toString());
+        noteView.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+
+        layoutContent.addView(noteView);
     }
 
     public boolean fileFound(String fileName) {
@@ -103,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
                     StringBuilder builder = new StringBuilder();
 
                     while((tmp = buffered.readLine()) != null) {
-                        builder.append(tmp + "\n");
+                        builder.append(tmp);
                     }
                     inputStream.close();
                     noteContent = builder.toString();
@@ -116,5 +127,30 @@ public class MainActivity extends AppCompatActivity {
         }
 
         this.noteList.add(noteContent);
+    }
+
+    public void loadAllNotes() {
+        File directory;
+        directory = getFilesDir();
+        File[] files = directory.listFiles();
+        Log.d(TAG, "loadAllNotes: " + files.length);
+        this.noteAmount = files.length;
+        for (int i = 0; i < files.length; i++) {
+            String fName = "Note" + i + ".txt";
+            Log.d(TAG, "loadAllNotes: " + files[i].getName());
+            loadNote(fName);
+        }
+    }
+
+    public void makeNoteViews() {
+        for (int i=0; i < noteList.size(); i++) {
+            TextView noteView = new TextView(this);
+            noteView.setText(noteList.get(i));
+            noteView.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+
+            layoutContent.addView(noteView);
+        }
     }
 }
