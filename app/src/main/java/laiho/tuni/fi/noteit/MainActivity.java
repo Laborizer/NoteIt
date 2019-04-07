@@ -3,6 +3,8 @@ package laiho.tuni.fi.noteit;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -20,15 +22,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainRecyclerViewAdapter.ItemClickListener {
 
     private static final String TAG = "MainActivity";
     private LinearLayout layoutContent;
-    private ArrayList<String> noteList;
     private int noteAmount;
     private EditText mainEditText;
+    private MainRecyclerViewAdapter adapter;
+    private int totalPoints;
+    private FileController fileController;
+    private List<Note> noteList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +47,23 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.saveButton);
         layoutContent = (LinearLayout) this.findViewById(R.id.mainContent);
-        this.noteList = new ArrayList<>();
-        this.noteAmount = 0;
 
         this.mainEditText = findViewById(R.id.MainEditText);
+        this.fileController = new FileController(this);
 
-        loadAllNotes();
-        makeNoteViews();
+        this.fileController.initFiles();
+        this.totalPoints = fileController.loadInit();
+        this.noteList = fileController.loadAllNotes();
+
+        TextView pointView = (TextView) findViewById(R.id.totalPointsTextView);
+        pointView.setText("Total Points: " + Integer.toString(fileController.getTotalPoints()));
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new MainRecyclerViewAdapter(this, this.noteList, fileController);
+        adapter.setClickListener(this);
+        recyclerView.setAdapter(adapter);
+
     }
 
     @Override
@@ -71,30 +88,89 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void save(View view) {
-        String fName = "Note" + this.noteList.size() + ".txt";
-        saveNote(fName);
+    /*
+    public void initFiles() {
+        if (!fileFound("init.txt")) {
+            File file = new File("init.txt");
+            try {
+                file.mkdirs();
+                file.createNewFile();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        loadInit();
+        loadAllNotes();
     }
 
+    private void loadInit() {
+        StringBuilder builder = new StringBuilder();
+        int points;
+
+        if (fileFound("init.txt")) {
+            try {
+                InputStream inputStream = openFileInput("init.txt");
+                if (inputStream != null) {
+                    InputStreamReader reader = new InputStreamReader(inputStream);
+                    BufferedReader buffered = new BufferedReader(reader);
+                    String tmp;
+
+                    while((tmp = buffered.readLine()) != null) {
+                        builder.append(tmp);
+                    }
+                    inputStream.close();
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (!builder.toString().equals("")) {
+            this.totalPoints = Integer.parseInt(builder.toString());
+        } else {
+            this.totalPoints = 0;
+        }
+        TextView textView = findViewById(R.id.totalPointsTextView);
+        textView.setText("Total Points: " + this.totalPoints);
+
+    }
+*/
+    public void save(View view) {
+        String fName = "Note" + fileController.noteAmount() + ".txt";
+        Log.d(TAG, "save: " + fName);
+        noteList.add(fileController.saveNote(
+                fName,
+                mainEditText.getText().toString(),
+                fileController.noteAmount()));
+        adapter.notifyDataSetChanged();
+    }
+/*
     public void saveNote(String fileName) {
+        File file = new File(fileName);
         try {
-            OutputStreamWriter out =
-                    new OutputStreamWriter(openFileOutput(fileName, 0));
-            out.write(mainEditText.getText().toString());
+            file.mkdirs();
+            file.createNewFile();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+        Note savedNote = new Note(mainEditText.getText().toString());
+        try {
+            PrintWriter out = new PrintWriter(openFileOutput(fileName, 0));
+            out.println(savedNote.getDescription());
+            out.println(",");
+            out.println(savedNote.getAwardPoints());
             out.close();
             Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT).show();
-            noteList.add(mainEditText.getText().toString());
+            noteList.add(savedNote);
         } catch (Throwable t) {
             t.printStackTrace();
         }
 
-        TextView noteView = new TextView(this);
-        noteView.setText(mainEditText.getText().toString());
-        noteView.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT));
-
-        layoutContent.addView(noteView);
+        this.totalPoints += savedNote.getAwardPoints();
     }
 
     public boolean fileFound(String fileName) {
@@ -104,6 +180,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void loadNote(String fileName) {
         String noteContent = "";
+        int notePoints = 0;
+        StringBuilder builder = new StringBuilder();
+
         if (fileFound(fileName)) {
             try {
                 InputStream inputStream = openFileInput(fileName);
@@ -111,13 +190,11 @@ public class MainActivity extends AppCompatActivity {
                     InputStreamReader reader = new InputStreamReader(inputStream);
                     BufferedReader buffered = new BufferedReader(reader);
                     String tmp;
-                    StringBuilder builder = new StringBuilder();
 
                     while((tmp = buffered.readLine()) != null) {
                         builder.append(tmp);
                     }
                     inputStream.close();
-                    noteContent = builder.toString();
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -125,32 +202,31 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+        String[] lines = builder.toString().split(",");
+        noteContent = lines[0];
+        Log.d(TAG, "loadNote: lines length: " + lines.length);
+        Log.d(TAG, "loadNote: lines: " + lines[0]);
+        notePoints = Integer.parseInt(lines[1]);
 
-        this.noteList.add(noteContent);
+        this.noteList.add(new Note(noteContent, notePoints, false));
     }
 
     public void loadAllNotes() {
         File directory;
         directory = getFilesDir();
         File[] files = directory.listFiles();
-        Log.d(TAG, "loadAllNotes: " + files.length);
+        Log.d(TAG, "loadAllNotes: " + (files.length - 1));
         this.noteAmount = files.length;
         for (int i = 0; i < files.length; i++) {
             String fName = "Note" + i + ".txt";
             Log.d(TAG, "loadAllNotes: " + files[i].getName());
             loadNote(fName);
         }
-    }
+    } */
 
-    public void makeNoteViews() {
-        for (int i=0; i < noteList.size(); i++) {
-            TextView noteView = new TextView(this);
-            noteView.setText(noteList.get(i));
-            noteView.setLayoutParams(new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT));
+    @Override
+    public void onItemClick(View view, int position) {
+        //Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
 
-            layoutContent.addView(noteView);
-        }
     }
 }
