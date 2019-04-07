@@ -3,6 +3,8 @@ package laiho.tuni.fi.noteit;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -22,13 +24,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainRecyclerViewAdapter.ItemClickListener {
 
     private static final String TAG = "MainActivity";
     private LinearLayout layoutContent;
     private ArrayList<String> noteList;
     private int noteAmount;
     private EditText mainEditText;
+    private MainRecyclerViewAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,13 @@ public class MainActivity extends AppCompatActivity {
 
         loadAllNotes();
         makeNoteViews();
+
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new MainRecyclerViewAdapter(this, noteList);
+        adapter.setClickListener(this);
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -152,5 +162,10 @@ public class MainActivity extends AppCompatActivity {
 
             layoutContent.addView(noteView);
         }
+    }
+
+    @Override
+    public void onItemClick(View view, int position) {
+        Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
     }
 }
