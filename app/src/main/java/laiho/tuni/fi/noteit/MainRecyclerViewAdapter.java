@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import java.util.List;
@@ -43,21 +44,28 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView descriptionTextView;
-        TextView pointsTextView;
-        Button checkButton;
+        private TextView descriptionTextView;
+        private TextView pointsTextView;
+        private RadioButton completeButton;
 
         ViewHolder(View itemView) {
             super(itemView);
             descriptionTextView = itemView.findViewById(R.id.noteDescription);
             pointsTextView = itemView.findViewById(R.id.notePoints);
-            checkButton = itemView.findViewById(R.id.completeButton);
-            itemView.setOnClickListener(this);
+            completeButton = itemView.findViewById(R.id.completeButton);
+
+            //itemView.setOnClickListener(this);
+            completeButton.setOnClickListener(this);
+
         }
 
         @Override
         public void onClick(View view) {
-            if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
+            if(view.equals(completeButton)){
+                removeAt(getAdapterPosition());
+            }else if (mClickListener != null){
+                mClickListener.onItemClick(view, getAdapterPosition());
+            }
         }
     }
 
@@ -69,7 +77,17 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
         this.mClickListener = itemClickListener;
     }
 
+    public void radioOnClick(View v) {
+
+    }
+
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+    }
+
+    public void removeAt(int position) {
+        mData.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, mData.size());
     }
 }

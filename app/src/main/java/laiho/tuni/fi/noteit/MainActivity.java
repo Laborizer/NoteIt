@@ -24,16 +24,18 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements MainRecyclerViewAdapter.ItemClickListener {
 
     private static final String TAG = "MainActivity";
     private LinearLayout layoutContent;
-    private ArrayList<Note> noteList;
+    private List<Note> noteList;
     private int noteAmount;
     private EditText mainEditText;
     private MainRecyclerViewAdapter adapter;
     private int totalPoints;
+    private FileController fileController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,10 +51,11 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         this.noteAmount = 0;
 
         this.mainEditText = findViewById(R.id.MainEditText);
+        this.fileController = new FileController(this);
 
-        initFiles();
-        //makeNoteViews();
-
+        this.fileController.initFiles();
+        this.totalPoints = fileController.loadInit();
+        this.noteList = fileController.loadAllNotes();
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -84,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         return super.onOptionsItemSelected(item);
     }
 
+    /*
     public void initFiles() {
         if (!fileFound("init.txt")) {
             File file = new File("init.txt");
@@ -132,12 +136,12 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         textView.setText("Total Points: " + this.totalPoints);
 
     }
-
+*/
     public void save(View view) {
         String fName = "Note" + this.noteList.size() + ".txt";
-        saveNote(fName);
+        fileController.saveNote(fName, mainEditText.getText().toString(), noteList.size());
     }
-
+/*
     public void saveNote(String fileName) {
         File file = new File(fileName);
         try {
@@ -212,10 +216,11 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
             Log.d(TAG, "loadAllNotes: " + files[i].getName());
             loadNote(fName);
         }
-    }
+    } */
 
     @Override
     public void onItemClick(View view, int position) {
-        Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
+
     }
 }
