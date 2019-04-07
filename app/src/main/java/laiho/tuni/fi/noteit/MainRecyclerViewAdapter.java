@@ -6,17 +6,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.List;
 
 public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerViewAdapter.ViewHolder> {
 
-    private List<String> mData;
+    private List<Note> mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
 
-    public MainRecyclerViewAdapter (Context context, List<String> data) {
+    public MainRecyclerViewAdapter (Context context, List<Note> data) {
         this.mData = data;
         this.mInflater = LayoutInflater.from(context);
     }
@@ -30,8 +31,10 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull MainRecyclerViewAdapter.ViewHolder viewHolder, int i) {
-        String animal = mData.get(i);
-        viewHolder.myTextView.setText(animal);
+        String note = mData.get(i).getDescription();
+        int points = mData.get(i).getAwardPoints();
+        viewHolder.descriptionTextView.setText(note);
+        viewHolder.pointsTextView.setText(Integer.toString(points));
     }
 
     @Override
@@ -40,11 +43,15 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView myTextView;
+        TextView descriptionTextView;
+        TextView pointsTextView;
+        Button checkButton;
 
         ViewHolder(View itemView) {
             super(itemView);
-            myTextView = itemView.findViewById(R.id.noteDescription);
+            descriptionTextView = itemView.findViewById(R.id.noteDescription);
+            pointsTextView = itemView.findViewById(R.id.notePoints);
+            checkButton = itemView.findViewById(R.id.completeButton);
             itemView.setOnClickListener(this);
         }
 
@@ -54,11 +61,11 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
         }
     }
 
-    String getItem(int id) {
+    public Note getItem(int id) {
         return mData.get(id);
     }
 
-    void setClickListener(ItemClickListener itemClickListener) {
+    public void setClickListener(ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
 

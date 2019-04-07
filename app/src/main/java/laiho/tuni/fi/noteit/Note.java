@@ -1,20 +1,25 @@
 package laiho.tuni.fi.noteit;
 
 public class Note {
-    private int id;
     private String description;
     private int awardPoints;
     private boolean isCleared;
 
-    public Note() {
-
+    public Note(String desc) {
+        setDescription(desc);
+        setAwardPoints(generateRandomPoints(50, 200));
+        setCleared(false);
     }
 
-    public Note(int id, String desc, int points, boolean cleared) {
-        setId(id);
+    public Note(String desc, int points, boolean cleared) {
         setDescription(desc);
         setAwardPoints(points);
         setCleared(cleared);
+    }
+
+    private int generateRandomPoints(int min, int max) {
+        int result = min + (int)(Math.random() * ((max - min) + 1));
+        return result;
     }
 
     public int getAwardPoints() {
@@ -39,13 +44,5 @@ public class Note {
 
     public void setCleared(boolean cleared) {
         this.isCleared = cleared;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 }
