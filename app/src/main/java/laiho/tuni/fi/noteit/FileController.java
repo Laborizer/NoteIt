@@ -18,9 +18,11 @@ import java.util.List;
 
 public class FileController {
     private Context context;
+    private int totalPoints;
 
     public FileController(Context context) {
         this.context = context;
+        this.totalPoints = 0;
     }
     public boolean fileFound(String fileName) {
         File file = context.getFileStreamPath(fileName);
@@ -32,7 +34,7 @@ public class FileController {
         int notePoints = 0;
         StringBuilder builder = new StringBuilder();
 
-        if (fileFound(fileName)) {
+        if (fileFound(fileName) && !fileName.equals("init.txt")) {
             try {
                 InputStream inputStream = context.openFileInput(fileName);
                 if (inputStream != null) {
@@ -51,9 +53,15 @@ public class FileController {
                 e.printStackTrace();
             }
         }
+        Log.d("test", "loadNote: " + builder.toString());
         String[] lines = builder.toString().split(",");
-        noteContent = lines[0];
-        notePoints = Integer.parseInt(lines[1]);
+        try {
+            noteContent = lines[0];
+            notePoints = Integer.parseInt(lines[1]);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            e.printStackTrace();
+        }
+        Log.d("test", "loadNote: returned a new Note");
 
         return new Note(noteContent, notePoints, false);
     }
@@ -63,12 +71,31 @@ public class FileController {
         List<Note> notes = new ArrayList<>();
         directory = context.getFilesDir();
         File[] files = directory.listFiles();
-        for (int i = 0; i < files.length; i++) {
-            String fName = "Note" + i + ".txt";
-            notes.add(loadNote(fName));
+        Log.d("test", "loadAllNotes: " + files.length);
+        if (files.length > 0) {
+            for (int i = 0; i < files.length; i++) {
+                String fName = "Note" + i + ".txt";
+                if (fileFound(fName)) {
+                    notes.add(loadNote(fName));
+                }
+            }
         }
 
+
         return notes;
+    }
+
+    public int noteAmount() {
+        File directory = context.getFilesDir();
+        File[] files = directory.listFiles();
+        int amount;
+
+        if (files.length > 0) {
+            amount = files.length;
+        } else {
+            amount = 0;
+        }
+        return amount;
     }
 
     public Note saveNote(String fileName, String savedString, int size) {
@@ -90,6 +117,7 @@ public class FileController {
         } catch (Throwable t) {
             t.printStackTrace();
         }
+        //this.loadAllNotes();
 
         return savedNote;
     }
@@ -117,12 +145,13 @@ public class FileController {
                 e.printStackTrace();
             }
         }
-
+        Log.d("Test", "loadInit: " + builder.toString());
         if (!builder.toString().equals("")) {
             points = Integer.parseInt(builder.toString());
         } else {
             points = 0;
         }
+        this.totalPoints = points;
         return points;
     }
 
@@ -136,5 +165,31 @@ public class FileController {
                 e1.printStackTrace();
             }
         }
+    }
+
+    public boolean deleteNote(String fileName, int points) {
+        File dir = context.getFilesDir();
+        File file = new File(dir, fileName);
+        Log.d("test", "deleteNote: " + dir.listFiles()[0] + " " + fileName);
+        boolean deleted = file.delete();
+        savePoints(points);
+
+        return deleted;
+    }
+
+    public void savePoints(int points) {
+        this.totalPoints += points;
+        Log.d("Test", "savePoints: " + this.totalPoints);
+        try {
+            PrintWriter out = new PrintWriter(context.openFileOutput("init.txt", 0));
+            out.print(Integer.toString(this.totalPoints));
+            out.close();
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
+    public int getTotalPoints() {
+        return this.totalPoints;
     }
 }

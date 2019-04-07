@@ -3,6 +3,7 @@ package laiho.tuni.fi.noteit;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,10 +18,15 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
     private List<Note> mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
+    private FileController fileController;
+    Context context;
 
-    public MainRecyclerViewAdapter (Context context, List<Note> data) {
+    public MainRecyclerViewAdapter (Context context, List<Note> data, FileController controller) {
         this.mData = data;
-        this.mInflater = LayoutInflater.from(context);
+        this.context = context;
+        this.mInflater = LayoutInflater.from(this.context);
+        this.fileController = controller;
+        Log.d("Adapter", "MainRecyclerViewAdapter: " + mData.size() + "vs " + data.size());
     }
 
     @NonNull
@@ -86,8 +92,10 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
     }
 
     public void removeAt(int position) {
+        fileController.deleteNote("Note" + position + ".txt", mData.get(position).getAwardPoints());
         mData.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, mData.size());
+        Log.d("test", "removeAt: " + position + " " + mData.size());
     }
 }

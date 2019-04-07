@@ -30,12 +30,12 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
 
     private static final String TAG = "MainActivity";
     private LinearLayout layoutContent;
-    private List<Note> noteList;
     private int noteAmount;
     private EditText mainEditText;
     private MainRecyclerViewAdapter adapter;
     private int totalPoints;
     private FileController fileController;
+    private List<Note> noteList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +47,6 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         setSupportActionBar(toolbar);
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.saveButton);
         layoutContent = (LinearLayout) this.findViewById(R.id.mainContent);
-        this.noteList = new ArrayList<>();
-        this.noteAmount = 0;
 
         this.mainEditText = findViewById(R.id.MainEditText);
         this.fileController = new FileController(this);
@@ -57,9 +55,12 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         this.totalPoints = fileController.loadInit();
         this.noteList = fileController.loadAllNotes();
 
+        TextView pointView = (TextView) findViewById(R.id.totalPointsTextView);
+        pointView.setText("Total Points: " + Integer.toString(fileController.getTotalPoints()));
+
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MainRecyclerViewAdapter(this, noteList);
+        adapter = new MainRecyclerViewAdapter(this, this.noteList, fileController);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
 
@@ -138,8 +139,13 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
     }
 */
     public void save(View view) {
-        String fName = "Note" + this.noteList.size() + ".txt";
-        fileController.saveNote(fName, mainEditText.getText().toString(), noteList.size());
+        String fName = "Note" + fileController.noteAmount() + ".txt";
+        Log.d(TAG, "save: " + fName);
+        noteList.add(fileController.saveNote(
+                fName,
+                mainEditText.getText().toString(),
+                fileController.noteAmount()));
+        adapter.notifyDataSetChanged();
     }
 /*
     public void saveNote(String fileName) {
