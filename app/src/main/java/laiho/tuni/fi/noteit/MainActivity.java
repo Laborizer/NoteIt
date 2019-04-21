@@ -15,6 +15,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
     private MainRecyclerViewAdapter adapter;
     private int totalPoints;
     private FileController fileController;
+    private JsonController jsonController;
     private List<Note> noteList;
 
     @Override
@@ -50,10 +55,11 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
 
         this.mainEditText = findViewById(R.id.MainEditText);
         this.fileController = new FileController(this);
+        this.jsonController = new JsonController(this);
 
         this.fileController.initFiles();
         this.totalPoints = fileController.loadInit();
-        this.noteList = fileController.loadAllNotes();
+        this.noteList = this.listFromJson();
 
         TextView pointView = (TextView) findViewById(R.id.totalPointsTextView);
         pointView.setText("Total Points: " + Integer.toString(fileController.getTotalPoints()));
@@ -63,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         adapter = new MainRecyclerViewAdapter(this, this.noteList, fileController);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
+
+        this.listFromJson();
 
     }
 
@@ -139,14 +147,47 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
     }
 */
     public void save(View view) {
+        /*
         String fName = "Note" + fileController.noteAmount() + ".txt";
         Log.d(TAG, "save: " + fName);
         noteList.add(fileController.saveNote(
                 fName,
                 mainEditText.getText().toString(),
                 fileController.noteAmount()));
+        adapter.notifyDataSetChanged(); */
+        Note newNote = new Note(mainEditText.getText().toString());
+
+
+        noteList.add(newNote);
         adapter.notifyDataSetChanged();
+        JSONArray arr = jsonController.createNoteJsonArray(this.noteList);
+        jsonController.writeJson("AllNotes.json", arr.toString());
     }
+
+    public List<Note> listFromJson() {
+        String JSONString = this.jsonController.readFromFile("AllNotes.json");
+        List<Note> resultList = new ArrayList<>();
+        Log.d(TAG, "listFromJson: " + JSONString);
+        JSONObject currentObject = new JSONObject();
+
+        try {
+            JSONArray arr = new JSONArray(JSONString);
+            for (int i = 0; i < arr.length(); i++) {
+                currentObject = arr.getJSONObject(i);
+                Log.d(TAG, "listFromJson: " + currentObject.getString("NoteContent"));
+                resultList.add(new Note(
+                        currentObject.getString("NoteContent"),
+                        currentObject.getInt("AwardPoints"),
+                        false));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        resultList.toString();
+        return resultList;
+    }
+
+
 /*
     public void saveNote(String fileName) {
         File file = new File(fileName);

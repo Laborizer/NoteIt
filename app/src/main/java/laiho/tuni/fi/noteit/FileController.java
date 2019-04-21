@@ -29,6 +29,8 @@ public class FileController {
         return file.exists();
     }
 
+
+
     public Note loadNote(String fileName) {
         String noteContent = "";
         int notePoints = 0;
