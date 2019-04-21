@@ -35,6 +35,23 @@ public class JsonController {
         return jsonObject;
     }
 
+    public void loadInit() {
+        String dir = context.getFilesDir().getAbsolutePath();
+        File init = new File(dir,"Init.json");
+        File allNotes = new File(dir,"AllNotes.json");
+        Log.d("JsonController", "loadInit: " + init.exists());
+        Log.d("JsonController", "loadInit: " + allNotes.exists());
+        if (!init.exists()) {
+            try {
+                JSONObject initObject = new JSONObject();
+                writeJson("Init.json", initObject.toString());
+                Log.d("JsonController", "loadInit: Create Init.json");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void writeJson(String fileName, String data) {
         try {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
@@ -52,15 +69,6 @@ public class JsonController {
 
         String ret = "";
         File file = new File(fileName);
-        if (!file.exists() && fileName.equals("Init.json")) {
-            try {
-                file = new File(context.getFilesDir(), fileName);
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
 
         try {
             InputStream inputStream = context.openFileInput(fileName);

@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         this.fileController = new FileController(this);
         this.jsonController = new JsonController(this);
 
+        jsonController.loadInit();
         this.noteList = this.jsonController.listFromJson();
         try {
             JSONObject obj = new JSONObject(jsonController.readFromFile("Init.json"));
