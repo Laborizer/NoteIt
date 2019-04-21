@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+
 import java.util.List;
 
 public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerViewAdapter.ViewHolder> {
@@ -18,14 +20,14 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
     private List<Note> mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
-    private FileController fileController;
+    private JsonController jsonController;
     Context context;
 
-    public MainRecyclerViewAdapter (Context context, List<Note> data, FileController controller) {
+    public MainRecyclerViewAdapter (Context context, List<Note> data, JsonController controller) {
         this.mData = data;
         this.context = context;
         this.mInflater = LayoutInflater.from(this.context);
-        this.fileController = controller;
+        this.jsonController = controller;
         Log.d("Adapter", "MainRecyclerViewAdapter: " + mData.size() + "vs " + data.size());
     }
 
@@ -92,8 +94,10 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
     }
 
     public void removeAt(int position) {
-        fileController.deleteNote("Note" + position + ".txt", mData.get(position).getAwardPoints());
+        int points = mData.get(position).getAwardPoints();
         mData.remove(position);
+        JSONArray arr = jsonController.createNoteJsonArray(this.mData);
+        jsonController.writeJson("AllNotes.json", arr.toString());
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, mData.size());
         Log.d("test", "removeAt: " + position + " " + mData.size());

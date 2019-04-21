@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JsonController {
@@ -98,6 +99,29 @@ public class JsonController {
             e.printStackTrace();
         }
         return jsonArray;
+    }
+
+    public List<Note> listFromJson() {
+        String JSONString = readFromFile("AllNotes.json");
+        List<Note> resultList = new ArrayList<>();
+        Log.d("JsonController", "listFromJson: " + JSONString);
+        JSONObject currentObject = new JSONObject();
+
+        try {
+            JSONArray arr = new JSONArray(JSONString);
+            for (int i = 0; i < arr.length(); i++) {
+                currentObject = arr.getJSONObject(i);
+                Log.d("JsonController", "listFromJson: " + currentObject.getString("NoteContent"));
+                resultList.add(new Note(
+                        currentObject.getString("NoteContent"),
+                        currentObject.getInt("AwardPoints"),
+                        false));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        resultList.toString();
+        return resultList;
     }
 
 }

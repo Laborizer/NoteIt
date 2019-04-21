@@ -59,14 +59,14 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
 
         this.fileController.initFiles();
         this.totalPoints = fileController.loadInit();
-        this.noteList = this.listFromJson();
+        this.noteList = this.jsonController.listFromJson();
 
         TextView pointView = (TextView) findViewById(R.id.totalPointsTextView);
         pointView.setText("Total Points: " + Integer.toString(fileController.getTotalPoints()));
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MainRecyclerViewAdapter(this, this.noteList, fileController);
+        adapter = new MainRecyclerViewAdapter(this, this.noteList, jsonController);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
 
