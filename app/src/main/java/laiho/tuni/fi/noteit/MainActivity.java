@@ -34,8 +34,8 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
 
     private static final String TAG = "MainActivity";
     private LinearLayout layoutContent;
-    private int noteAmount;
     private EditText mainEditText;
+    private TextView pointView;
     private MainRecyclerViewAdapter adapter;
     private int totalPoints;
     private FileController fileController;
@@ -57,12 +57,20 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         this.fileController = new FileController(this);
         this.jsonController = new JsonController(this);
 
-        this.fileController.initFiles();
-        this.totalPoints = fileController.loadInit();
         this.noteList = this.jsonController.listFromJson();
+        try {
+            JSONObject obj = new JSONObject(jsonController.readFromFile("Init.json"));
+            if (!obj.isNull("TotalPoints")) {
+                this.totalPoints = obj.getInt("TotalPoints");
+            } else {
+                this.totalPoints = 0;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        TextView pointView = (TextView) findViewById(R.id.totalPointsTextView);
-        pointView.setText("Total Points: " + Integer.toString(fileController.getTotalPoints()));
+        this.pointView = (TextView) findViewById(R.id.totalPointsTextView);
+        pointView.setText("Total Points: " + this.totalPoints);
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -266,8 +274,29 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
     } */
 
     @Override
-    public void onItemClick(View view, int position) {
-        //Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
+    public void onItemClick(View view, int position, int points) {
+        if (points != 0) {
+
+            try {
+                JSONObject obj = new JSONObject(
+                        jsonController.readFromFile("Init.json"));
+                JSONObject newObj = new JSONObject();
+                if (obj.isNull("TotalPoints")) {
+                    this.totalPoints = points;
+                } else {
+                    this.totalPoints = obj.getInt("TotalPoints") + points;
+                }
+
+                newObj.put("TotalPoints", this.totalPoints);
+                jsonController.writeJson("Init.json", newObj.toString());
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+            this.pointView.setText("Total Points: " + this.totalPoints);
+            Toast.makeText(this, "Task cleared! Points Awarded: " + points, Toast.LENGTH_SHORT).show();
+        }
 
     }
 }

@@ -12,6 +12,8 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -70,9 +72,14 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
         @Override
         public void onClick(View view) {
             if(view.equals(completeButton)){
-                removeAt(getAdapterPosition());
+                int i = getAdapterPosition();
+                mClickListener.onItemClick(
+                        view,
+                        getAdapterPosition(),
+                        mData.get(getAdapterPosition()).getAwardPoints());
+                removeAt(i);
             }else if (mClickListener != null){
-                mClickListener.onItemClick(view, getAdapterPosition());
+                mClickListener.onItemClick(view, getAdapterPosition(), 0);
             }
         }
     }
@@ -90,11 +97,12 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
     }
 
     public interface ItemClickListener {
-        void onItemClick(View view, int position);
+        void onItemClick(View view, int position, int points);
     }
 
     public void removeAt(int position) {
-        int points = mData.get(position).getAwardPoints();
+
+
         mData.remove(position);
         JSONArray arr = jsonController.createNoteJsonArray(this.mData);
         jsonController.writeJson("AllNotes.json", arr.toString());

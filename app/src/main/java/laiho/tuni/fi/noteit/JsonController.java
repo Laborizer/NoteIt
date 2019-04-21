@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +51,16 @@ public class JsonController {
     public String readFromFile(String fileName) {
 
         String ret = "";
+        File file = new File(fileName);
+        if (!file.exists() && fileName.equals("Init.json")) {
+            try {
+                file = new File(context.getFilesDir(), fileName);
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
 
         try {
             InputStream inputStream = context.openFileInput(fileName);
@@ -70,6 +81,7 @@ public class JsonController {
         }
         catch (FileNotFoundException e) {
             e.printStackTrace();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
