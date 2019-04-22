@@ -35,6 +35,11 @@ public class JsonController {
         return jsonObject;
     }
 
+    public void clearNoteData() {
+        JSONArray arr = new JSONArray();
+        writeJson("AllNotes.json", arr.toString());
+    }
+
     public void loadInit() {
         String dir = context.getFilesDir().getAbsolutePath();
         File init = new File(dir,"Init.json");

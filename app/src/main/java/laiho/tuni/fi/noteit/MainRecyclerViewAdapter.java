@@ -1,6 +1,7 @@
 package laiho.tuni.fi.noteit;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -46,6 +47,16 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
         int points = mData.get(i).getAwardPoints();
         viewHolder.descriptionTextView.setText(note);
         viewHolder.pointsTextView.setText(Integer.toString(points));
+        if(i %2 == 1)
+        {
+            viewHolder.itemView.setBackgroundColor(Color.parseColor("#ffdb8e"));
+            //  holder.imageView.setBackgroundColor(Color.parseColor("#FFFFFF"));
+        }
+        else
+        {
+            viewHolder.itemView.setBackgroundColor(Color.parseColor("#e5c379"));
+            //  holder.imageView.setBackgroundColor(Color.parseColor("#FFFAF8FD"));
+        }
     }
 
     @Override
@@ -53,7 +64,7 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
         return mData.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         private TextView descriptionTextView;
         private TextView pointsTextView;
         private RadioButton completeButton;
@@ -81,6 +92,12 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
             }else if (mClickListener != null){
                 mClickListener.onItemClick(view, getAdapterPosition(), 0);
             }
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            removeAt(getAdapterPosition());
+            return true;
         }
     }
 

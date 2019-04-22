@@ -3,6 +3,7 @@ package laiho.tuni.fi.noteit;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -29,6 +30,8 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.support.v7.widget.RecyclerView.HORIZONTAL;
 
 public class MainActivity extends AppCompatActivity implements MainRecyclerViewAdapter.ItemClickListener {
 
@@ -75,6 +78,10 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        DividerItemDecoration itemDecor = new DividerItemDecoration(this, HORIZONTAL);
+        recyclerView.addItemDecoration(itemDecor);
+
         adapter = new MainRecyclerViewAdapter(this, this.noteList, jsonController);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
