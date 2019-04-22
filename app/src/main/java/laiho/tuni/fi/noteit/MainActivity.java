@@ -129,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
 
+        //Setting Alarm
         setAlarm();
 
     }
@@ -169,7 +170,8 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
 
     /**
      * Method sets an alarm to clear the JSON data at approximately 12am and to repeat it on
-     * a daily interval.
+     * a daily interval. Uses an intent to notify a BroadcastReceiver to perform the task even
+     * when the app is not running.
      */
     public void setAlarm() {
         Calendar calendar = Calendar.getInstance();
@@ -185,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         PendingIntent pintent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, pintent);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pintent);
     }
 
     /**
