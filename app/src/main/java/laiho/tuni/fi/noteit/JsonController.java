@@ -211,4 +211,25 @@ public class JsonController {
         return resultList;
     }
 
+    /**
+     * Method reads Init.json and finds the amount of points stored.
+     *
+     * @return int Returns the amount of points found in the file, or 0 in case there's no points.
+     */
+    public int pointsFromJson() {
+        int totalPoints = 0;
+        try {
+            JSONObject obj = new JSONObject(this.readFromFile("Init.json"));
+            if (!obj.isNull("TotalPoints")) {
+                totalPoints = obj.getInt("TotalPoints");
+            } else {
+                totalPoints = 0;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return totalPoints;
+    }
+
 }

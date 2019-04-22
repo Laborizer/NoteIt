@@ -1,5 +1,9 @@
 package laiho.tuni.fi.noteit;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -21,9 +25,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import static android.support.v7.widget.RecyclerView.HORIZONTAL;
+import static android.support.v7.widget.RecyclerView.VERTICAL;
 
 /**
  * NoteIt is a simple program that allows users to create little notes for their day and be awarded
@@ -88,42 +95,45 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
 
+        //Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //Add -Button
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.saveButton);
+
+        //Layout
         layoutContent = (LinearLayout) this.findViewById(R.id.mainContent);
 
+        //EditText
         this.mainEditText = findViewById(R.id.MainEditText);
+
+        //JsonController
         this.jsonController = new JsonController(this);
-
         jsonController.loadInit();
-        this.noteList = this.jsonController.listFromJson();
-        try {
-            JSONObject obj = new JSONObject(jsonController.readFromFile("Init.json"));
-            if (!obj.isNull("TotalPoints")) {
-                this.totalPoints = obj.getInt("TotalPoints");
-            } else {
-                this.totalPoints = 0;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
 
+        //Loading data from Init.json and AllNotes.json
+        this.noteList = this.jsonController.listFromJson();
+        this.totalPoints = this.jsonController.pointsFromJson();
+
+        //TextView
         this.pointView = (TextView) findViewById(R.id.totalPointsTextView);
         pointView.setText("Total Points: " + this.totalPoints);
 
+        //RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        DividerItemDecoration itemDecor = new DividerItemDecoration(this, HORIZONTAL);
+        DividerItemDecoration itemDecor = new DividerItemDecoration(this, VERTICAL);
         recyclerView.addItemDecoration(itemDecor);
 
         adapter = new MainRecyclerViewAdapter(this, this.noteList, jsonController);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
+
+        setAlarm();
 
     }
 
@@ -159,6 +169,27 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Method sets an alarm to clear the JSON data at approximately 12am and to repeat it on
+     * a daily interval.
+     */
+    public void setAlarm() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        //00:00:00
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+
+        Intent intent = new Intent(this, DeletionReceiver.class);
+        PendingIntent pintent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, pintent);
     }
 
     /**
