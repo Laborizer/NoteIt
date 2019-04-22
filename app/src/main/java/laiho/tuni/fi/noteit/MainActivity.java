@@ -20,14 +20,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +33,6 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
     private TextView pointView;
     private MainRecyclerViewAdapter adapter;
     private int totalPoints;
-    private FileController fileController;
     private JsonController jsonController;
     private List<Note> noteList;
 
@@ -57,7 +48,6 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         layoutContent = (LinearLayout) this.findViewById(R.id.mainContent);
 
         this.mainEditText = findViewById(R.id.MainEditText);
-        this.fileController = new FileController(this);
         this.jsonController = new JsonController(this);
 
         jsonController.loadInit();
@@ -112,65 +102,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         return super.onOptionsItemSelected(item);
     }
 
-    /*
-    public void initFiles() {
-        if (!fileFound("init.txt")) {
-            File file = new File("init.txt");
-            try {
-                file.mkdirs();
-                file.createNewFile();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-        }
-
-        loadInit();
-        loadAllNotes();
-    }
-
-    private void loadInit() {
-        StringBuilder builder = new StringBuilder();
-        int points;
-
-        if (fileFound("init.txt")) {
-            try {
-                InputStream inputStream = openFileInput("init.txt");
-                if (inputStream != null) {
-                    InputStreamReader reader = new InputStreamReader(inputStream);
-                    BufferedReader buffered = new BufferedReader(reader);
-                    String tmp;
-
-                    while((tmp = buffered.readLine()) != null) {
-                        builder.append(tmp);
-                    }
-                    inputStream.close();
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (!builder.toString().equals("")) {
-            this.totalPoints = Integer.parseInt(builder.toString());
-        } else {
-            this.totalPoints = 0;
-        }
-        TextView textView = findViewById(R.id.totalPointsTextView);
-        textView.setText("Total Points: " + this.totalPoints);
-
-    }
-*/
     public void save(View view) {
-        /*
-        String fName = "Note" + fileController.noteAmount() + ".txt";
-        Log.d(TAG, "save: " + fName);
-        noteList.add(fileController.saveNote(
-                fName,
-                mainEditText.getText().toString(),
-                fileController.noteAmount()));
-        adapter.notifyDataSetChanged(); */
         Note newNote = new Note(mainEditText.getText().toString());
 
 
@@ -202,84 +134,6 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         resultList.toString();
         return resultList;
     }
-
-
-/*
-    public void saveNote(String fileName) {
-        File file = new File(fileName);
-        try {
-            file.mkdirs();
-            file.createNewFile();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-
-        Note savedNote = new Note(mainEditText.getText().toString());
-        try {
-            PrintWriter out = new PrintWriter(openFileOutput(fileName, 0));
-            out.println(savedNote.getDescription());
-            out.println(",");
-            out.println(savedNote.getAwardPoints());
-            out.close();
-            Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT).show();
-            noteList.add(savedNote);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-
-        this.totalPoints += savedNote.getAwardPoints();
-    }
-
-    public boolean fileFound(String fileName) {
-        File file = getBaseContext().getFileStreamPath(fileName);
-        return file.exists();
-    }
-
-    public void loadNote(String fileName) {
-        String noteContent = "";
-        int notePoints = 0;
-        StringBuilder builder = new StringBuilder();
-
-        if (fileFound(fileName)) {
-            try {
-                InputStream inputStream = openFileInput(fileName);
-                if (inputStream != null) {
-                    InputStreamReader reader = new InputStreamReader(inputStream);
-                    BufferedReader buffered = new BufferedReader(reader);
-                    String tmp;
-
-                    while((tmp = buffered.readLine()) != null) {
-                        builder.append(tmp);
-                    }
-                    inputStream.close();
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        String[] lines = builder.toString().split(",");
-        noteContent = lines[0];
-        Log.d(TAG, "loadNote: lines length: " + lines.length);
-        Log.d(TAG, "loadNote: lines: " + lines[0]);
-        notePoints = Integer.parseInt(lines[1]);
-
-        this.noteList.add(new Note(noteContent, notePoints, false));
-    }
-
-    public void loadAllNotes() {
-        File directory;
-        directory = getFilesDir();
-        File[] files = directory.listFiles();
-        Log.d(TAG, "loadAllNotes: " + (files.length - 1));
-        this.noteAmount = files.length;
-        for (int i = 0; i < files.length; i++) {
-            String fName = "Note" + i + ".txt";
-            Log.d(TAG, "loadAllNotes: " + files[i].getName());
-            loadNote(fName);
-        }
-    } */
 
     @Override
     public void onItemClick(View view, int position, int points) {

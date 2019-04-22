@@ -8,13 +8,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.List;
 
@@ -50,12 +47,10 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
         if(i %2 == 1)
         {
             viewHolder.itemView.setBackgroundColor(Color.parseColor("#ffdb8e"));
-            //  holder.imageView.setBackgroundColor(Color.parseColor("#FFFFFF"));
         }
         else
         {
             viewHolder.itemView.setBackgroundColor(Color.parseColor("#e5c379"));
-            //  holder.imageView.setBackgroundColor(Color.parseColor("#FFFAF8FD"));
         }
     }
 
@@ -118,8 +113,6 @@ public class MainRecyclerViewAdapter extends RecyclerView.Adapter<MainRecyclerVi
     }
 
     public void removeAt(int position) {
-
-
         mData.remove(position);
         JSONArray arr = jsonController.createNoteJsonArray(this.mData);
         jsonController.writeJson("AllNotes.json", arr.toString());
