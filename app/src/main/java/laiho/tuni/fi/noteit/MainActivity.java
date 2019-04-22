@@ -30,7 +30,8 @@ import static android.support.v7.widget.RecyclerView.VERTICAL;
 
 /**
  * NoteIt is a simple program that allows users to create little notes for their day and be awarded
- * for their productivity with points to help motivate them to note things.
+ * for their productivity with points to help motivate them to note things. Notes are deleted at
+ * the end of each day.
  *
  * MainActivity is the main class of the application that controls the flow of the application,
  * the layout and its components.
