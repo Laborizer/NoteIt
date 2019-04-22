@@ -172,6 +172,8 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
         adapter.notifyDataSetChanged();
         JSONArray arr = jsonController.createNoteJsonArray(this.noteList);
         jsonController.writeJson("AllNotes.json", arr.toString());
+        mainEditText.setText("");
+        Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT);
     }
 
     /**
