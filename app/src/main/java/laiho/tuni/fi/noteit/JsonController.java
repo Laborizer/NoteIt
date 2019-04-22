@@ -17,12 +17,38 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * JsonController controls the use of JSON data.
+ *
+ * JsonController class holds methods with which to control the flow and use of JSON data and files
+ * of the app.
+ * @author Lauri Laiho
+ * @version 1.0
+ * @since 2019-04-21
+ */
 public class JsonController {
+
+    /**
+     * Context from which the controller is used from.
+     */
     private Context context;
+
+    /**
+     * Constructor for the JsonController
+     *
+     * @param context Context from which the controller is used from.
+     */
     public JsonController(Context context) {
         this.context = context;
     }
 
+    /**
+     * Method creates a JSONObject from the two parametres given and returns it.
+     *
+     * @param noteContent The content or text of the Note
+     * @param awardPoints The amount of points in the Note in question.
+     * @return JSONObject The created JSONObject.
+     */
     public JSONObject createJsonObject(String noteContent, int awardPoints) {
         JSONObject jsonObject = new JSONObject();
 
@@ -35,17 +61,20 @@ public class JsonController {
         return jsonObject;
     }
 
+    /**
+     * Method clears all note data by overwriting them with an empty JSONArray for later use.
+     */
     public void clearNoteData() {
         JSONArray arr = new JSONArray();
         writeJson("AllNotes.json", arr.toString());
     }
 
+    /**
+     * Method checks if Init.json file exists and creates it if it does not.
+     */
     public void loadInit() {
         String dir = context.getFilesDir().getAbsolutePath();
         File init = new File(dir,"Init.json");
-        File allNotes = new File(dir,"AllNotes.json");
-        Log.d("JsonController", "loadInit: " + init.exists());
-        Log.d("JsonController", "loadInit: " + allNotes.exists());
         if (!init.exists()) {
             try {
                 JSONObject initObject = new JSONObject();
@@ -57,6 +86,13 @@ public class JsonController {
         }
     }
 
+    /**
+     * The writeJson -method writes or overwrites a file of given name, and writes the given
+     * data as a String
+     *
+     * @param fileName The name of the written file.
+     * @param data The data to be written into the file as a String
+     */
     public void writeJson(String fileName, String data) {
         try {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
@@ -70,6 +106,13 @@ public class JsonController {
         }
     }
 
+    /**
+     * Method reads data from a file of a given name and builds it into a String
+     * using StringBuilder. The data is then returned as a String.
+     *
+     * @param fileName The name of the file to be read from.
+     * @return String The data from the file.
+     */
     public String readFromFile(String fileName) {
 
         String ret = "";
@@ -102,6 +145,12 @@ public class JsonController {
         return ret;
     }
 
+    /**
+     * Method creates a JSONObject from a String of json data.
+     *
+     * @param str The String from which the JSONObject is created from.
+     * @return JSONObject The resulting JSONObject.
+     */
     public JSONObject stringToJson(String str) {
         JSONObject newObject = null;
         try {
@@ -112,6 +161,12 @@ public class JsonController {
         return newObject;
     }
 
+    /**
+     * Method creates a JSONArray from given List containing Notes.
+     *
+     * @param list The given List of Notes from which the JSONArray is created from.
+     * @return JSONArray The resulting JSONArray containing the Notes in JSON format.
+     */
     public JSONArray createNoteJsonArray(List<Note> list) {
         JSONArray jsonArray = new JSONArray();
         try {
@@ -126,6 +181,13 @@ public class JsonController {
         return jsonArray;
     }
 
+    /**
+     * Method creates a List of Notes by reading AllNotes.json file. Iterating through the
+     * JSONArray it gets from the file, a List of the Notes is created with each having the
+     * corresponding data added to them.
+     *
+     * @return List All the notes from the file.
+     */
     public List<Note> listFromJson() {
         String JSONString = readFromFile("AllNotes.json");
         List<Note> resultList = new ArrayList<>();
