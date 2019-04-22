@@ -1,7 +1,6 @@
 package laiho.tuni.fi.noteit;
 
 import android.content.Context;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -79,7 +78,6 @@ public class JsonController {
             try {
                 JSONObject initObject = new JSONObject();
                 writeJson("Init.json", initObject.toString());
-                Log.d("JsonController", "loadInit: Create Init.json");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -99,7 +97,6 @@ public class JsonController {
                     context.openFileOutput(fileName, Context.MODE_PRIVATE));
             outputStreamWriter.write(data);
             outputStreamWriter.close();
-            Log.d("Json: WriteToJSON", "writeJson: " + data);
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -191,14 +188,12 @@ public class JsonController {
     public List<Note> listFromJson() {
         String JSONString = readFromFile("AllNotes.json");
         List<Note> resultList = new ArrayList<>();
-        Log.d("JsonController", "listFromJson: " + JSONString);
         JSONObject currentObject = new JSONObject();
 
         try {
             JSONArray arr = new JSONArray(JSONString);
             for (int i = 0; i < arr.length(); i++) {
                 currentObject = arr.getJSONObject(i);
-                Log.d("JsonController", "listFromJson: " + currentObject.getString("NoteContent"));
                 resultList.add(new Note(
                         currentObject.getString("NoteContent"),
                         currentObject.getInt("AwardPoints"),
