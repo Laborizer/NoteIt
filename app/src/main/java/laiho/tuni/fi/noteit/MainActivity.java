@@ -136,40 +136,6 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerViewA
     }
 
     /**
-     * Method creates and add options -Menu to the toolbar
-     *
-     * @param menu Menu that is created
-     * @return boolean True.
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    /**
-     * Method returns true if the pressed menu is settings menu.
-     *
-     * @param item Menu item being pressed.
-     * @return boolean True
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    /**
      * Method sets an alarm to clear the JSON data at approximately 12am and to repeat it on
      * a daily interval. Uses an intent to notify a BroadcastReceiver to perform the task even
      * when the app is not running.
