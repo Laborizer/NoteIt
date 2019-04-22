@@ -1,12 +1,16 @@
 package laiho.tuni.fi.noteit;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,218 +19,195 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Calendar;
 import java.util.List;
 
+import static android.support.v7.widget.RecyclerView.VERTICAL;
+
+/**
+ * NoteIt is a simple program that allows users to create little notes for their day and be awarded
+ * for their productivity with points to help motivate them to note things. Notes are deleted at
+ * the end of each day.
+ *
+ * MainActivity is the main class of the application that controls the flow of the application,
+ * the layout and its components.
+ *
+ * @author Lauri Laiho
+ * @version 1.0
+ * @since 2019-03-17
+ */
 public class MainActivity extends AppCompatActivity implements MainRecyclerViewAdapter.ItemClickListener {
 
+    /**
+     * Tag for logging purposes, states the name of the class.
+     */
     private static final String TAG = "MainActivity";
+
+    /**
+     * LinearLayout which holds the main components of the application.
+     */
     private LinearLayout layoutContent;
-    private int noteAmount;
+
+    /**
+     * EditText component which references the main text field of the app.
+     */
     private EditText mainEditText;
+
+    /**
+     * TextView component which shows and references the amount of points user has collected.
+     */
+    private TextView pointView;
+
+    /**
+     * Class which holds and controls the RecyclerView holding and showing the notes.
+     */
     private MainRecyclerViewAdapter adapter;
+
+    /**
+     * Amount of points the user has.
+     */
     private int totalPoints;
-    private FileController fileController;
+
+    /**
+     * JsonController which controls the flow of JSON data into and from files.
+     */
+    private JsonController jsonController;
+
+    /**
+     * List of Notes which are currently in the app.
+     */
     private List<Note> noteList;
 
+    /**
+     * Method that is called when launching the app. It sets the pointers to different layout
+     * components. Also sets the amount of points the user has after it as read it from the files.
+     *
+     * @param savedInstanceState Bundle from which a saved state of the activity can be retrieved
+     *                           from.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
 
+        //Toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        //Add -Button
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.saveButton);
+
+        //Layout
         layoutContent = (LinearLayout) this.findViewById(R.id.mainContent);
 
+        //EditText
         this.mainEditText = findViewById(R.id.MainEditText);
-        this.fileController = new FileController(this);
 
-        this.fileController.initFiles();
-        this.totalPoints = fileController.loadInit();
-        this.noteList = fileController.loadAllNotes();
+        //JsonController
+        this.jsonController = new JsonController(this);
+        jsonController.loadInit();
 
-        TextView pointView = (TextView) findViewById(R.id.totalPointsTextView);
-        pointView.setText("Total Points: " + Integer.toString(fileController.getTotalPoints()));
+        //Loading data from Init.json and AllNotes.json
+        this.noteList = this.jsonController.listFromJson();
+        this.totalPoints = this.jsonController.pointsFromJson();
 
+        //TextView
+        this.pointView = (TextView) findViewById(R.id.totalPointsTextView);
+        pointView.setText("Total Points: " + this.totalPoints);
+
+        //RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MainRecyclerViewAdapter(this, this.noteList, fileController);
+
+        DividerItemDecoration itemDecor = new DividerItemDecoration(this, VERTICAL);
+        recyclerView.addItemDecoration(itemDecor);
+
+        adapter = new MainRecyclerViewAdapter(this, this.noteList, jsonController);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
 
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    /*
-    public void initFiles() {
-        if (!fileFound("init.txt")) {
-            File file = new File("init.txt");
-            try {
-                file.mkdirs();
-                file.createNewFile();
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-        }
-
-        loadInit();
-        loadAllNotes();
-    }
-
-    private void loadInit() {
-        StringBuilder builder = new StringBuilder();
-        int points;
-
-        if (fileFound("init.txt")) {
-            try {
-                InputStream inputStream = openFileInput("init.txt");
-                if (inputStream != null) {
-                    InputStreamReader reader = new InputStreamReader(inputStream);
-                    BufferedReader buffered = new BufferedReader(reader);
-                    String tmp;
-
-                    while((tmp = buffered.readLine()) != null) {
-                        builder.append(tmp);
-                    }
-                    inputStream.close();
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (!builder.toString().equals("")) {
-            this.totalPoints = Integer.parseInt(builder.toString());
-        } else {
-            this.totalPoints = 0;
-        }
-        TextView textView = findViewById(R.id.totalPointsTextView);
-        textView.setText("Total Points: " + this.totalPoints);
+        //Setting Alarm
+        setAlarm();
 
     }
-*/
+
+    /**
+     * Method sets an alarm to clear the JSON data at approximately 12am and to repeat it on
+     * a daily interval. Uses an intent to notify a BroadcastReceiver to perform the task even
+     * when the app is not running.
+     */
+    public void setAlarm() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        //00:00:00
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+
+        Intent intent = new Intent(this, DeletionReceiver.class);
+        PendingIntent pintent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pintent);
+    }
+
+    /**
+     * Method creates a Note when Save -button is pressed. Note gets the text from the EditText
+     * and is then saved into the Note List. RecyclerView is notified of the data change and the
+     * new List of Notes is written into AllNotes.json file.
+     *
+     * @param view View from which the onClick was invoked.
+     */
     public void save(View view) {
-        String fName = "Note" + fileController.noteAmount() + ".txt";
-        Log.d(TAG, "save: " + fName);
-        noteList.add(fileController.saveNote(
-                fName,
-                mainEditText.getText().toString(),
-                fileController.noteAmount()));
+        Note newNote = new Note(mainEditText.getText().toString());
+
+
+        noteList.add(newNote);
         adapter.notifyDataSetChanged();
-    }
-/*
-    public void saveNote(String fileName) {
-        File file = new File(fileName);
-        try {
-            file.mkdirs();
-            file.createNewFile();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        }
-
-        Note savedNote = new Note(mainEditText.getText().toString());
-        try {
-            PrintWriter out = new PrintWriter(openFileOutput(fileName, 0));
-            out.println(savedNote.getDescription());
-            out.println(",");
-            out.println(savedNote.getAwardPoints());
-            out.close();
-            Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT).show();
-            noteList.add(savedNote);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-
-        this.totalPoints += savedNote.getAwardPoints();
+        JSONArray arr = jsonController.createNoteJsonArray(this.noteList);
+        jsonController.writeJson("AllNotes.json", arr.toString());
+        mainEditText.setText("");
+        Toast.makeText(this, "Note saved!", Toast.LENGTH_SHORT);
     }
 
-    public boolean fileFound(String fileName) {
-        File file = getBaseContext().getFileStreamPath(fileName);
-        return file.exists();
-    }
+    /**
+     * Method assigns a new Total Point value based on amount of points received from a cleared
+     * Note and the amount user had previously. The amount is also updated on the TextView.
+     *
+     * @param view RecyclerViewItem's radiobutton.
+     * @param position Position of the Item on RecyclerView.
+     * @param points Amount of points the Note had assigned to it.
+     */
+    @Override
+    public void onItemClick(View view, int position, int points) {
+        if (points != 0) {
 
-    public void loadNote(String fileName) {
-        String noteContent = "";
-        int notePoints = 0;
-        StringBuilder builder = new StringBuilder();
-
-        if (fileFound(fileName)) {
             try {
-                InputStream inputStream = openFileInput(fileName);
-                if (inputStream != null) {
-                    InputStreamReader reader = new InputStreamReader(inputStream);
-                    BufferedReader buffered = new BufferedReader(reader);
-                    String tmp;
-
-                    while((tmp = buffered.readLine()) != null) {
-                        builder.append(tmp);
-                    }
-                    inputStream.close();
+                JSONObject obj = new JSONObject(
+                        jsonController.readFromFile("Init.json"));
+                JSONObject newObj = new JSONObject();
+                if (obj.isNull("TotalPoints")) {
+                    this.totalPoints = points;
+                } else {
+                    this.totalPoints = obj.getInt("TotalPoints") + points;
                 }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+
+                newObj.put("TotalPoints", this.totalPoints);
+                jsonController.writeJson("Init.json", newObj.toString());
+
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
+
+            this.pointView.setText("Total Points: " + this.totalPoints);
+            Toast.makeText(this, "Task cleared! Points Awarded: " + points, Toast.LENGTH_SHORT).show();
         }
-        String[] lines = builder.toString().split(",");
-        noteContent = lines[0];
-        Log.d(TAG, "loadNote: lines length: " + lines.length);
-        Log.d(TAG, "loadNote: lines: " + lines[0]);
-        notePoints = Integer.parseInt(lines[1]);
-
-        this.noteList.add(new Note(noteContent, notePoints, false));
-    }
-
-    public void loadAllNotes() {
-        File directory;
-        directory = getFilesDir();
-        File[] files = directory.listFiles();
-        Log.d(TAG, "loadAllNotes: " + (files.length - 1));
-        this.noteAmount = files.length;
-        for (int i = 0; i < files.length; i++) {
-            String fName = "Note" + i + ".txt";
-            Log.d(TAG, "loadAllNotes: " + files[i].getName());
-            loadNote(fName);
-        }
-    } */
-
-    @Override
-    public void onItemClick(View view, int position) {
-        //Toast.makeText(this, "You clicked " + adapter.getItem(position) + " on row number " + position, Toast.LENGTH_SHORT).show();
 
     }
 }
